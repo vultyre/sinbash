@@ -1,17 +1,26 @@
 #!/bin/bash
 #Set VTAIL to always include the backtitle for the title of the installer
-VTAIL=${VTAIL=whiptail --backtitle "Vultyre's_Installer_Tool_0.1"}
+export SINTAIL=${SINTAIL=whiptail --clear --backtitle "SInBash-0.1"}
+
+#Set up the sinbash config directory
+if [ ! -d $HOME/.config ] ; then
+	mkdir $HOME/.config
+fi
+if [ ! -d $HOME/.config/sinbash ] ; then
+	mkdir $HOME/.config/sinbash
+fi
+export CONFIG=$HOME/.config/sinbash
 
 #Prompt for what to install
-$VTAIL --checklist --separate-output "Choose what to install" 30 60 18 \
+$SINTAIL --checklist --separate-output "Choose what to install" 30 60 18 \
 	"Toggle tiling mode" "  A tiling mode for xfwm4" off \
-	"AwOken icons" "  A popular icon set" off 2>.installscripts/installed
+	"AwOken icons" "  A popular icon set" off 2>$CONFIG/toinstall
 
 # Read everything in and execute the correct installer script for that package
 while read choice; do
 	case "$choice" in
 		"Toggle tiling mode")
-			#bash .installscripts/toggle_tiling_mode.inst
+			#ash .installscripts/toggle_tiling_mode.inst
 			echo "Install tiling mode"
 			;;
 		"AwOken icons")
@@ -22,9 +31,22 @@ while read choice; do
 			echo "NOTTOGGLETILINGMODE"
 			;;
 	esac
-done < .installscripts/installed
+done < $CONFIG/toinstall
 
 #If no input given (Ok hit without continuing or cancel hit"
-if ! [ -s .installscripts/installed ] ; then
-	$VTAIL --msgbox "Installation canceled" 7 30
+if [ ! -s $CONFIG/toinstall ] ; then
+	$SINTAIL --msgbox "Nothing installed." 7 30
+fi
+
+#Cleanup
+if [ -s $CONFIG/toinstall ] ; then
+	rm $CONFIG/toinstall
+fi
+if [ "$(ls -A $CONFIG 2> /dev/null)" == "" ]; then
+	echo "Removing $CONFIG"
+	rmdir $CONFIG
+fi
+if [ "$(ls -A $HOME/.config 2> /dev/null)" == "" ]; then
+	echo "Removing $HOME/.config"
+	rmdir $HOME/.config
 fi
